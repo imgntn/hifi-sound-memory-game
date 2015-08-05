@@ -1,0 +1,20 @@
+{
+  "name": "xanadu",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "author": "James Pollack <james.b.pollack@gmail.com> (http://jamesbpollack.com/)",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.13.3",
+    "cors": "^2.7.1",
+    "dotenv": "^1.2.0",
+    "express": "^4.13.2",
+    "jsonwebtoken": "^5.0.4",
+    "mongoose": "^4.1.0",
+    "morgan": "^1.6.1"
+  }
+}
