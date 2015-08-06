@@ -17,7 +17,7 @@
 
 	//thanks for the assist!! :)
 	Script.include('https://hifi-public.s3.amazonaws.com/eric/scripts/tween.js');
-	Script.include('http://localhost:8080/from_hifi/floor.js');
+	Script.include('./from_hifi/floor.js');
 
 	var SOUND_URLS = [
 		'http://localhost:8080/wavs/C3.wav',
@@ -71,6 +71,8 @@
 		green: 255,
 		blue: 0
 	};
+
+	var COLORS=[RED,GREEN,BLUE,YELLOW];
 
 
 	var GLOW_DURATION, SOUND_DURATION;
@@ -206,11 +208,7 @@
 					y: BOX_LOCATIONS[index].y,
 					z: BOX_LOCATIONS[index].z
 				},
-				color: {
-					red: Math.random() * 255,
-					green: Math.random() * 255,
-					blue: Math.random() * 255
-				},
+				color: COLORS[index],
 				collisionsWillMove: false,
 				gravity: {
 					x: 0,
@@ -380,9 +378,9 @@
 		http.send(params);
 	}
 
-	function getHighScores() {
+	function getHighScores(howMany) {
 		var http = new XMLHttpRequest();
-		var url = "http://localhost:3000/api/top";
+		var url = "http://localhost:3000/api/top/"+howMany;
 		http.open("GET", url, true);
 
 		//Send the proper header information along with the request
