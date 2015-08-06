@@ -99,30 +99,30 @@
 		}, {
 			x: MyAvatar.position.x - RADIAL_DISTANCE,
 			y: MyAvatar.position.y,
-			z: MyAvatar.position.z,
+			z: MyAvatar.position.z
 		}]
 	} else {
 
 		var BOX_LOCATIONS = [{
 				x: MyAvatar.position.x + RADIAL_DISTANCE * 2,
 				y: MyAvatar.position.y,
-				z: MyAvatar.position.z + RADIAL_DISTANCE,
+				z: MyAvatar.position.z + RADIAL_DISTANCE + 15
 			}, {
 				x: MyAvatar.position.x + RADIAL_DISTANCE,
 				y: MyAvatar.position.y,
-				z: MyAvatar.position.z + RADIAL_DISTANCE,
+				z: MyAvatar.position.z + RADIAL_DISTANCE + 15
 			},
 
 			{
 				x: MyAvatar.position.x,
 				y: MyAvatar.position.y,
-				z: MyAvatar.position.z + RADIAL_DISTANCE,
+				z: MyAvatar.position.z + RADIAL_DISTANCE + 15
 			},
 
 			{
 				x: MyAvatar.position.x - RADIAL_DISTANCE,
 				y: MyAvatar.position.y,
-				z: MyAvatar.position.z + RADIAL_DISTANCE,
+				z: MyAvatar.position.z + RADIAL_DISTANCE + 15
 			},
 
 
@@ -372,22 +372,23 @@
 
 	function restartGame() {
 		print("Work on that memory!  Try again.");
-		resetCombinationSound();
-
 		var _a = App;
+		storeScore(_a.combination.length);
+		resetCombinationSound();
 		_a.currentGuessIndex = 0;
 		_a.combination = [];
 		_a.setStartingCombination();
 		_a.playCombination();
+
 		console.log('COMBINATION:' + _a.combination)
 
 	}
 
 
-	function storeScore(userID, score) {
+	function storeScore(score) {
 		var http = new XMLHttpRequest();
 		var url = demoBaseURL + "api/scores";
-		var params = "userID=" + userID + "&score=" + score;
+		var params = "highscore=" + score;
 		http.open("POST", url, true);
 
 		//Send the proper header information along with the request
@@ -397,9 +398,9 @@
 
 		http.onreadystatechange = function() { //Call a function when the state changes.
 			if (http.readyState == 4 && http.status == 200) {
-				print('IT WORKED!' + http.responseText);
+				print('IT WORKED! STORED SCORE' + http.responseText);
 			} else {
-				print('IT DID NOT WORK :(')
+				print('CHANGE STATE OF XML POST' + http.readyState)
 			}
 		}
 		http.send(params);
@@ -410,25 +411,58 @@
 		var url = demoBaseURL + "api/top/" + howMany;
 		http.open("GET", url, true);
 
-		//Send the proper header information along with the request
-		http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-		http.setRequestHeader("Content-length", params.length);
-		http.setRequestHeader("Connection", "close");
+
 
 		http.onreadystatechange = function() { //Call a function when the state changes.
 			if (http.readyState == 4 && http.status == 200) {
 
 				var data = JSON.parse(http.responseText);
-
-				print('IT WORKED!');
+				App.highScores = data;
+				print('IT WORKED!' + App.highScores.length);
 			} else {
-				print('IT DID NOT WORK :(')
+				print('CHANGE STATE OF XML GET')
 			}
 		}
-		http.send(params);
+		http.send(null);
+	}
+
+	function changeHighScoreText(text){
+		console.log('change high score text',text);
+		Entities.editEntity(App.scoreTextEntity,{
+			text:text
+		})
 	}
 
 	function displayHighScores() {
+		console.log('displaying high scores')
+		App.scoreTextEntity = Entities.addEntity({
+			type: "Text",
+			dimensions: {
+				x: 2,
+				y: 2,
+				z: 2
+			},
+			position:{
+				x:MyAvatar.position.x +10,
+				y:MyAvatar.position.y,
+				z:MyAvatar.position.z +10 
+			},
+			rotation:Quat.fromPitchYawRollDegrees(0,180,0),
+			backgroundColor: {
+				red: 255,
+				green: 0,
+				blue: 0
+			},
+			textColor: {
+				red: 255,
+				green: 255,
+				blue: 255
+			},
+			lineHeight: 0.5
+		});
+		console.log('added text')
+
+		changeHighScoreText('THIS IS A TEST');
 
 	}
 
@@ -503,13 +537,15 @@
 			console.log('cleaning up')
 			Entities.deleteEntity(_a.boxes[i]);
 		}
+		Entities.deleteEntity(App.scoreTextEntity)
 		resetCombinationSound();
 
 	}
 	Script.scriptEnding.connect(scriptEnding);
 
 	print("...finished loading");
-
+	getHighScores();
+	displayHighScores();
 	App.createBlockSet();
 	App.setStartingCombination();
 	App.playCombination();
