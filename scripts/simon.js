@@ -152,6 +152,7 @@
 		combination: [1, 2, 2, 1, 2, 3],
 		comboSoundIndex: 0,
 		soundBank: [],
+		isPlayingCombination:false,
 		combinationInterval: null,
 		combinationIntervals: [],
 		startingCombinationLength: 4,
@@ -211,10 +212,12 @@
 			var _t = this;
 			if (_t.comboSoundIndex < _t.combination.length) {
 				console.log('yea')
+				_t.isPlayingCombination=true;
 				playSound(_t.combination[_t.comboSoundIndex]);
 				_t.comboSoundIndex++
 			} else {
 				console.log('nay')
+				_t.isPlayingCombination=false;
 				changeGameStatusText(PLAY_STRING);
 				resetCombinationSound();
 
@@ -369,6 +372,10 @@
 	}
 
 	function handleMagicBoxInput(boxIndex) {
+		if(App.isPlayingCombination){
+			console.log('CURRENTLY PLAYING IGNORE INPUT!');
+			return
+		}
 		var _a = App;
 		var entityID = _a.boxes[boxIndex];
 		_a.animateBlock(entityID);
@@ -384,10 +391,6 @@
 
 
 
-	function playerDidWin() {
-		storeScore(round)
-		displayVictoryCelebration();
-	}
 
 	function displayVictoryCelebration() {
 
@@ -396,6 +399,12 @@
 	function restartGame() {
 		print("Work on that memory!  Try again.");
 		var _a = App;
+		if(_a.combination.length>_a.highScores[2]){
+			console.log('NEW HIGH SCORE!!!');
+		}
+		else{
+			console.log('SCORE NOT A HIGH SCORE');
+		}
 		storeScore(_a.combination.length);
 		resetCombinationSound();
 		_a.currentGuessIndex = 0;
