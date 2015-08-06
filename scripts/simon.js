@@ -35,6 +35,8 @@
 		SoundCache.getSound(SOUND_URLS[3])
 	]
 
+
+
 	function playSound(index) {
 		App.animateBlock(App.boxes[index]);
 		var options = {
@@ -49,6 +51,19 @@
 
 	}
 
+	var buzzSound = SoundCache.getSound(demoBaseURL + "wavs/buzz.wav"),
+
+		function playBuzz() {
+			var options = {
+				position: {
+					x: MyAvatar.position.x,
+					y: MyAvatar.position.y,
+					z: MyAvatar.position.z,
+				},
+				volume: 0.75
+			}
+			Audio.playSound(buzzSound, options);
+		}
 
 	var RED = {
 		red: 255,
@@ -172,6 +187,7 @@
 		handleFinalGuess: function() {
 			var _t = this;
 			_t.generateNextStep();
+			changeGameStatusText(RIGHT_STRING)
 			console.log('current combination is:' + _t.combination);
 			_t.playCombination();
 		},
@@ -180,6 +196,7 @@
 		},
 		playCombination: function() {
 			var _t = this;
+			changeGameStatusText(LISTEN_STRING);
 			//add a slight delay before this starts... never really in a hurry.
 			Script.setTimeout(function() {
 				var myInterval = Script.setInterval(function() {
@@ -198,6 +215,7 @@
 				_t.comboSoundIndex++
 			} else {
 				console.log('nay')
+				changeGameStatusText(PLAY_STRING);
 				resetCombinationSound();
 
 			}
@@ -304,7 +322,12 @@
 
 	function handleIncorrectGuess() {
 		print("NOT CORRECT!")
-		restartGame();
+		playBuzz();
+		changeGameStatusText(WRONG_STRING);
+		Script.setTimeout(function() {
+			restartGame();
+		}, 1000);
+
 	}
 
 	function handleCorrectGuess() {
@@ -399,6 +422,7 @@
 		http.onreadystatechange = function() { //Call a function when the state changes.
 			if (http.readyState == 4 && http.status == 200) {
 				print('IT WORKED! STORED SCORE' + http.responseText);
+				getHighScores();
 			} else {
 				print('CHANGE STATE OF XML POST' + http.readyState)
 			}
@@ -418,6 +442,8 @@
 
 				var data = JSON.parse(http.responseText);
 				App.highScores = data;
+				displayHighScorePanel();
+				changeHighScoreText(data);
 				print('IT WORKED!' + App.highScores.length);
 			} else {
 				print('CHANGE STATE OF XML GET')
@@ -426,30 +452,37 @@
 		http.send(null);
 	}
 
-	function changeHighScoreText(text){
-		console.log('change high score text',text);
-		Entities.editEntity(App.scoreTextEntity,{
-			text:text
+	function changeGameStatusText(text) {
+		console.log('change game status text' + text);
+		Entities.editEntity(App.displayTextEntity, {
+			text: text
 		})
 	}
 
-	function displayHighScores() {
-		console.log('displaying high scores')
-		App.scoreTextEntity = Entities.addEntity({
+
+
+	var LISTEN_STRING = 'LISTEN...';
+	var PLAY_STRING = 'NOW PLAY!';
+	var WRONG_STRING = 'WRONG!  START OVER!';
+	var RIGHT_STRING = 'GREAT ROUND, NEXT!';
+
+	function displayTextPanel() {
+		console.log('displaying high scores');
+		App.displayTextEntity = Entities.addEntity({
 			type: "Text",
 			dimensions: {
-				x: 2,
+				x: 6,
 				y: 2,
-				z: 2
+				z: 1
 			},
-			position:{
-				x:MyAvatar.position.x +10,
-				y:MyAvatar.position.y,
-				z:MyAvatar.position.z +10 
+			position: {
+				x: BOX_LOCATIONS[1].x,
+				y: BOX_LOCATIONS[1].y + 3,
+				z: BOX_LOCATIONS[1].z
 			},
-			rotation:Quat.fromPitchYawRollDegrees(0,180,0),
+			rotation: Quat.fromPitchYawRollDegrees(0, 180, 0),
 			backgroundColor: {
-				red: 255,
+				red: 0,
 				green: 0,
 				blue: 0
 			},
@@ -462,7 +495,56 @@
 		});
 		console.log('added text')
 
-		changeHighScoreText('THIS IS A TEST');
+
+
+	}
+
+
+	function changeHighScoreText(data) {
+		App.highestScore = 0;
+		console.log('change high score text');
+		var scoreString = "High Scores: \n \n"
+		for (var i = 0; i < 3; i++) {
+			print('DATA IN HIGH SCORE:' + data[i].highscore);
+			if (data[i].highscore > App.highestScore) {
+				App.highestScore = data[i].highscore;
+			}
+			scoreString = scoreString + data[i].highscore + "\n ";
+		}
+
+		console.log('HIGHEST SCORE:', App.highestScore);
+		Entities.editEntity(App.highScoreTextEntity, {
+			text: scoreString
+		})
+	}
+
+	function displayHighScorePanel() {
+		App.highScoreTextEntity = Entities.addEntity({
+			type: "Text",
+			dimensions: {
+				x: 6,
+				y: 4,
+				z: 1
+			},
+			position: {
+				x: BOX_LOCATIONS[1].x - 8,
+				y: BOX_LOCATIONS[1].y + 4,
+				z: BOX_LOCATIONS[1].z + 5
+			},
+			rotation: Quat.fromPitchYawRollDegrees(0, 180, 0),
+			backgroundColor: {
+				red: 0,
+				green: 0,
+				blue: 0
+			},
+			textColor: {
+				red: 255,
+				green: 255,
+				blue: 255
+			},
+			lineHeight: 0.5
+		});
+		console.log('added text')
 
 	}
 
@@ -537,7 +619,8 @@
 			console.log('cleaning up')
 			Entities.deleteEntity(_a.boxes[i]);
 		}
-		Entities.deleteEntity(App.scoreTextEntity)
+		Entities.deleteEntity(App.highScoreTextEntity);
+		Entities.deleteEntity(App.displayTextEntity);
 		resetCombinationSound();
 
 	}
@@ -545,7 +628,9 @@
 
 	print("...finished loading");
 	getHighScores();
-	displayHighScores();
+
 	App.createBlockSet();
+
 	App.setStartingCombination();
+	displayTextPanel();
 	App.playCombination();
