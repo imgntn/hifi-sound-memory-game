@@ -39,23 +39,44 @@
 	}
 	var GLOW_DURATION, SOUND_DURATION;
 	GLOW_DURATION = SOUND_DURATION = 1000;
-	var RADIAL_DISTANCE = 35;
-	var BOX_LOCATIONS = [{
+	var RADIAL_DISTANCE = 10;
+	// var BOX_LOCATIONS = [{
+	// 	x: MyAvatar.position.x + RADIAL_DISTANCE,
+	// 	y: MyAvatar.position.y,
+	// 	z: MyAvatar.position.z,
+	// }, {
+	// 	x: MyAvatar.position.x,
+	// 	y: MyAvatar.position.y,
+	// 	z: MyAvatar.position.z + RADIAL_DISTANCE
+	// }, {
+	// 	x: MyAvatar.position.x,
+	// 	y: MyAvatar.position.y,
+	// 	z: MyAvatar.position.z - RADIAL_DISTANCE
+	// }, {
+	// 	x: MyAvatar.position.x - RADIAL_DISTANCE,
+	// 	y: MyAvatar.position.y,
+	// 	z: MyAvatar.position.z,
+	// }]
+
+		var BOX_LOCATIONS = [{
+		x: MyAvatar.position.x ,
+		y: MyAvatar.position.y,
+		z: MyAvatar.position.z + RADIAL_DISTANCE,
+	},
+	{
 		x: MyAvatar.position.x + RADIAL_DISTANCE,
 		y: MyAvatar.position.y,
-		z: MyAvatar.position.z,
-	}, {
-		x: MyAvatar.position.x,
+		z: MyAvatar.position.z + RADIAL_DISTANCE,
+	},
+	{
+		x: MyAvatar.position.x  - RADIAL_DISTANCE,
 		y: MyAvatar.position.y,
-		z: MyAvatar.position.z + RADIAL_DISTANCE
-	}, {
-		x: MyAvatar.position.x,
+		z: MyAvatar.position.z + RADIAL_DISTANCE,
+	},
+	{
+		x: MyAvatar.position.x + RADIAL_DISTANCE*2,
 		y: MyAvatar.position.y,
-		z: MyAvatar.position.z - RADIAL_DISTANCE
-	}, {
-		x: MyAvatar.position.x - RADIAL_DISTANCE,
-		y: MyAvatar.position.y,
-		z: MyAvatar.position.z,
+		z: MyAvatar.position.z + RADIAL_DISTANCE ,
 	}]
 
 
@@ -66,8 +87,8 @@
 		comboSoundIndex: 0,
 		soundBank: [],
 		combinationInterval: null,
-		startingCombinationLength: 3,
-		currentCombinationLength: 3,
+		startingCombinationLength: 4,
+		currentCombinationLength: 4,
 		currentGuessIndex: 0,
 		boxesLocked: false,
 		hasTween: function() {
@@ -219,33 +240,36 @@
 		}
 	}
 
-	function turnOnGlow(entityID) {
+	function growBox(entityID) {
 		Entities.editEntity(entityID, {
-			glowLevel: 0.5
+			scale:{
+				x:5,
+				y:5,
+				z:5
+			}
 		})
 	}
 
-	function turnOnGlowTest() {
-		Entities.editEntity(App.boxes[1], {
-			glowLevel: 0.75
-		})
-	}
 
-	function turnOffGlow() {
+	function shrinkBox() {
 		Entities.editEntity(entityID, {
-			glowLevel: 0.0
+		scale:{
+				x:1,
+				y:1,
+				z:1
+			}
 		})
 	}
 
 	function toggleGlow(entityID) {
-		turnOnGlow(entityID);
-		Script.setTimeout(turnOffGlow(entityID, GLOW_DURATION));
+	
+		Script.setTimeout(shrinkBox(entityID, GLOW_DURATION));
 	}
 
 	function handleMagicBoxInput(boxIndex) {
 		var _a = App;
 		var entityID = _a.boxes[boxIndex];
-		turnOnGlow(entityID);
+		growBox(entityID);
 		playSound(boxIndex);
 		makeAGuess(boxIndex);
 	}
