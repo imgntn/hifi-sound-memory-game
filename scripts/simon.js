@@ -13,17 +13,19 @@
 
 	}
 
-	console.log('jtest!!!!')
+var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 
 	//thanks for the assist!! :)
 	Script.include('https://hifi-public.s3.amazonaws.com/eric/scripts/tween.js');
-	Script.include('./from_hifi/floor.js');
+	Script.include(demoBaseURL+'from_hifi/floor.js');
+
+	
 
 	var SOUND_URLS = [
-		'http://localhost:8080/wavs/C3.wav',
-		'http://localhost:8080/wavs/D3.wav',
-		'http://localhost:8080/wavs/F3.wav',
-		'http://localhost:8080/wavs/G3.wav',
+		demoBaseURL+'wavs/C3.wav',
+		demoBaseURL+'wavs/D3.wav',
+		demoBaseURL+'wavs/F3.wav',
+		demoBaseURL+'wavs/G3.wav',
 	];
 
 	var soundClips = [
@@ -72,54 +74,61 @@
 		blue: 0
 	};
 
-	var COLORS=[RED,GREEN,BLUE,YELLOW];
+	var COLORS = [RED, GREEN, BLUE, YELLOW];
 
 
 	var GLOW_DURATION, SOUND_DURATION;
-	GLOW_DURATION = SOUND_DURATION = 1000;
+	GLOW_DURATION = SOUND_DURATION = 1250;
 	var RADIAL_DISTANCE = 5;
-	// var BOX_LOCATIONS = [{
-	// 	x: MyAvatar.position.x + RADIAL_DISTANCE,
-	// 	y: MyAvatar.position.y,
-	// 	z: MyAvatar.position.z,
-	// }, {
-	// 	x: MyAvatar.position.x,
-	// 	y: MyAvatar.position.y,
-	// 	z: MyAvatar.position.z + RADIAL_DISTANCE
-	// }, {
-	// 	x: MyAvatar.position.x,
-	// 	y: MyAvatar.position.y,
-	// 	z: MyAvatar.position.z - RADIAL_DISTANCE
-	// }, {
-	// 	x: MyAvatar.position.x - RADIAL_DISTANCE,
-	// 	y: MyAvatar.position.y,
-	// 	z: MyAvatar.position.z,
-	// }]
 
-	var BOX_LOCATIONS = [{
-			x: MyAvatar.position.x + RADIAL_DISTANCE * 2,
-			y: MyAvatar.position.y,
-			z: MyAvatar.position.z + RADIAL_DISTANCE,
-		}, {
+	var SURROUND_MODE = false;
+
+	if (SURROUND_MODE) {
+		var BOX_LOCATIONS = [{
 			x: MyAvatar.position.x + RADIAL_DISTANCE,
 			y: MyAvatar.position.y,
-			z: MyAvatar.position.z + RADIAL_DISTANCE,
-		},
-
-		{
+			z: MyAvatar.position.z,
+		}, {
 			x: MyAvatar.position.x,
 			y: MyAvatar.position.y,
-			z: MyAvatar.position.z + RADIAL_DISTANCE,
-		},
-
-		{
+			z: MyAvatar.position.z + RADIAL_DISTANCE
+		}, {
+			x: MyAvatar.position.x,
+			y: MyAvatar.position.y,
+			z: MyAvatar.position.z - RADIAL_DISTANCE
+		}, {
 			x: MyAvatar.position.x - RADIAL_DISTANCE,
 			y: MyAvatar.position.y,
-			z: MyAvatar.position.z + RADIAL_DISTANCE,
-		},
+			z: MyAvatar.position.z,
+		}]
+	} else {
+
+		var BOX_LOCATIONS = [{
+				x: MyAvatar.position.x + RADIAL_DISTANCE * 2,
+				y: MyAvatar.position.y,
+				z: MyAvatar.position.z + RADIAL_DISTANCE,
+			}, {
+				x: MyAvatar.position.x + RADIAL_DISTANCE,
+				y: MyAvatar.position.y,
+				z: MyAvatar.position.z + RADIAL_DISTANCE,
+			},
+
+			{
+				x: MyAvatar.position.x,
+				y: MyAvatar.position.y,
+				z: MyAvatar.position.z + RADIAL_DISTANCE,
+			},
+
+			{
+				x: MyAvatar.position.x - RADIAL_DISTANCE,
+				y: MyAvatar.position.y,
+				z: MyAvatar.position.z + RADIAL_DISTANCE,
+			},
 
 
-	]
+		]
+	}
+
 
 
 	var App = {
@@ -143,9 +152,9 @@
 				var combo = Math.random(0, _t.startingCombinationLength);
 				combo = Math.floor(combo * _t.startingCombinationLength);
 				combination.push(combo);
-
 			}
 			_t.combination = combination;
+
 			console.log('starting combination is...' + combination)
 			return combination
 		},
@@ -154,22 +163,29 @@
 			var step = Math.random(0, _t.startingCombinationLength);
 			step = Math.floor(step * _t.startingCombinationLength);
 			_t.combination.push(step);
-			console.log('new step is:' + step)
+			_t.currentGuessIndex = 0;
+			Script.clearInterval(App.combinationInterval);
+			console.log('new step is:' + step);
 			return
 		},
 		handleFinalGuess: function() {
 			var _t = this;
-			_t.generateNextStep()
+			_t.generateNextStep();
+			console.log('current combination is:' + _t.combination);
+			_t.playCombination();
 		},
 		advancePlaybackIndex: function() {
 			var _t = this;
 		},
 		playCombination: function() {
 			var _t = this;
-			_t.combinationInterval = Script.setInterval(function() {
-				App.playSoundForCombination()
+			//add a slight delay before this starts... never really in a hurry.
+			Script.setTimeout(function() {
+				_t.combinationInterval = Script.setInterval(function() {
+					App.playSoundForCombination()
+				}, SOUND_DURATION);
+			}, 500);
 
-			}, SOUND_DURATION);
 		},
 		playSoundForCombination: function() {
 			console.log('play sound!')
@@ -322,16 +338,6 @@
 	}
 
 
-
-	function playSoundForDuration(index) {
-		// console.log('should play sound at index ' + index);
-		// var _a = App;
-		// var duration = SOUND_DURATION;
-		// var soundPlaying = Audio.playSound(_a.soundBank[index].sound, _a.soundBank[index].options);
-		// Script.setTimeout(stopSound(soundPlaying), duration);
-
-	}
-
 	function toggleGlowForDuration() {
 		var duration = GLOW_DURATION;
 		//	Script.setTimeout(_t.stopSound(soundPlaying), duration);
@@ -348,18 +354,22 @@
 	}
 
 	function restartGame() {
-		"Work on that memory!  Try again."
+		print("Work on that memory!  Try again.");
+		Script.clearInterval(App.combinationInterval);
+
+		var _a = App;
+		_a.currentGuessIndex = 0;
+		_a.combination = [];
+		_a.setStartingCombination();
+		_a.playCombination();
+		console.log('COMBINATION:' + _a.combination)
+
 	}
 
-	function restartLevel() {
-		print("Work on that memory!  Try again.")
-			//clear guesses
-			//play combination for level
-	}
 
 	function storeScore(userID, score) {
 		var http = new XMLHttpRequest();
-		var url = "http://localhost:3000/api/scores";
+		var url = demoBaseURL+"api/scores";
 		var params = "userID=" + userID + "&score=" + score;
 		http.open("POST", url, true);
 
@@ -380,7 +390,7 @@
 
 	function getHighScores(howMany) {
 		var http = new XMLHttpRequest();
-		var url = "http://localhost:3000/api/top/"+howMany;
+		var url = demoBaseURL+"api/top/" + howMany;
 		http.open("GET", url, true);
 
 		//Send the proper header information along with the request
@@ -467,6 +477,7 @@
 			console.log('cleaning up')
 			Entities.deleteEntity(_a.boxes[i]);
 		}
+		Script.clearInterval(App.combinationInterval);
 
 	}
 	Script.scriptEnding.connect(scriptEnding);
