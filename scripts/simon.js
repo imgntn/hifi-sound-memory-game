@@ -1,3 +1,10 @@
+	// notes from demo:
+	// make boxes, scale smaller and more life-size (or adjustable);
+
+	// my notes:
+	// better panels / billboards
+	// distribute boxes along whatever arc instead of just in a row / surround
+
 	print("started loading...");
 	var console = {};
 	console.log = function(p) {
