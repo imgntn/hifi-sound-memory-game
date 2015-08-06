@@ -22,10 +22,10 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 	
 
 	var SOUND_URLS = [
-		demoBaseURL+'wavs/C3.wav',
-		demoBaseURL+'wavs/D3.wav',
-		demoBaseURL+'wavs/F3.wav',
-		demoBaseURL+'wavs/G3.wav',
+		demoBaseURL+'wavs/quick-tones/C3.wav',
+		demoBaseURL+'wavs/quick-tones/D3.wav',
+		demoBaseURL+'wavs/quick-tones/F3.wav',
+		demoBaseURL+'wavs/quick-tones/G3.wav',
 	];
 
 	var soundClips = [
