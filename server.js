@@ -242,5 +242,5 @@ app.listen(process.env.PORT || 3000);
 
 var mongoose = require('mongoose');
 
-// mongoose.connect(process.env.MONGODB_URL);
-mongoose.connect('mongodb://localhost:27017')
+mongoose.connect(process.env.MONGOLAB_URI);
+//mongoose.connect('mongodb://localhost:27017')
