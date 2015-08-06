@@ -1,7 +1,7 @@
 var SPAWN_RANGE = 3;
 var basePosition, avatarRot;
 
-var size = 20
+var size = 40
 
 avatarRot = Quat.fromPitchYawRollDegrees(0, MyAvatar.bodyYaw, 0.0);
 basePosition = Vec3.sum(MyAvatar.position, Vec3.multiply(SPAWN_RANGE * 3, Quat.getFront(avatarRot)));
