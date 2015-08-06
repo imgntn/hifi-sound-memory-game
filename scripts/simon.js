@@ -13,19 +13,19 @@
 
 	}
 
-var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
+	var demoBaseURL = "https://hifi-spatial-sound-game.herokuapp.com/"
 
 	//thanks for the assist!! :)
 	Script.include('https://hifi-public.s3.amazonaws.com/eric/scripts/tween.js');
-	Script.include(demoBaseURL+'from_hifi/floor.js');
+	Script.include(demoBaseURL + 'from_hifi/floor.js');
 
-	
+
 
 	var SOUND_URLS = [
-		demoBaseURL+'wavs/quick-tones/C3.wav',
-		demoBaseURL+'wavs/quick-tones/D3.wav',
-		demoBaseURL+'wavs/quick-tones/F3.wav',
-		demoBaseURL+'wavs/quick-tones/G3.wav',
+		demoBaseURL + 'wavs/quick-tones/C3.wav',
+		demoBaseURL + 'wavs/quick-tones/D3.wav',
+		demoBaseURL + 'wavs/quick-tones/F3.wav',
+		demoBaseURL + 'wavs/quick-tones/G3.wav',
 	];
 
 	var soundClips = [
@@ -36,7 +36,7 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 	]
 
 	function playSound(index) {
-
+		App.animateBlock(App.boxes[index]);
 		var options = {
 			position: {
 				x: BOX_LOCATIONS[index].x,
@@ -78,7 +78,7 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 
 
 	var GLOW_DURATION, SOUND_DURATION;
-	GLOW_DURATION = SOUND_DURATION = 1250;
+	GLOW_DURATION = SOUND_DURATION = 750;
 	var RADIAL_DISTANCE = 5;
 
 	var SURROUND_MODE = false;
@@ -138,6 +138,7 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 		comboSoundIndex: 0,
 		soundBank: [],
 		combinationInterval: null,
+		combinationIntervals: [],
 		startingCombinationLength: 4,
 		currentCombinationLength: 4,
 		currentGuessIndex: 0,
@@ -164,7 +165,7 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 			step = Math.floor(step * _t.startingCombinationLength);
 			_t.combination.push(step);
 			_t.currentGuessIndex = 0;
-			Script.clearInterval(App.combinationInterval);
+			resetCombinationSound();
 			console.log('new step is:' + step);
 			return
 		},
@@ -181,10 +182,11 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 			var _t = this;
 			//add a slight delay before this starts... never really in a hurry.
 			Script.setTimeout(function() {
-				_t.combinationInterval = Script.setInterval(function() {
+				var myInterval = Script.setInterval(function() {
 					App.playSoundForCombination()
 				}, SOUND_DURATION);
-			}, 500);
+				App.combinationIntervals.push(myInterval);
+			}, 1000);
 
 		},
 		playSoundForCombination: function() {
@@ -192,12 +194,12 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 			var _t = this;
 			if (_t.comboSoundIndex < _t.combination.length) {
 				console.log('yea')
-				playSound(_t.combination[_t.comboSoundIndex])
+				playSound(_t.combination[_t.comboSoundIndex]);
 				_t.comboSoundIndex++
 			} else {
 				console.log('nay')
-				Script.clearInterval(App.combinationInterval);
-				_t.comboSoundIndex = 0;
+				resetCombinationSound();
+
 			}
 
 
@@ -231,7 +233,6 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 					y: 0,
 					z: 0
 				}
-				//,script:'http://localhost:8080/playSoundOnClick.js'
 
 
 			};
@@ -247,22 +248,58 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 			print('BOXES:' + _t.boxes)
 			_t.hasTween();
 		},
-		animateBlock: function() {
+		animateBlock: function(entityId) {
 			var _t = this;
-			var tween = new TWEEN.Tween({
-					x: 50,
-					y: 0
-				})
-				.to({
-					x: 400
-				}, 2000)
-				.easing(TWEEN.Easing.Elastic.InOut)
-				.onUpdate(function() {
+			var ANIMATION_DURATION = 250;
 
+			var begin = {
+				x: 1,
+				y: 1,
+				z: 1
+			}
+			var target = {
+				x: 3,
+				y: 3,
+				z: 3
+			}
+			var original = {
+				x: 1,
+				y: 1,
+				z: 1
+			}
+			var tweenHead = new TWEEN.Tween(begin).to(target, ANIMATION_DURATION);
+			// tween.easing(TWEEN.Easing.Elastic.InOut)
+			function update() {
+				Entities.editEntity(entityId, {
+					dimensions: {
+						x: begin.x,
+						y: begin.y,
+						z: begin.z
+					}
 				})
-				.start();
+			}
+
+			function updateBack() {
+				Entities.editEntity(entityId, {
+					dimensions: {
+						x: begin.x,
+						y: begin.y,
+						z: begin.z
+					}
+				})
+			}
+			var tweenBack = new TWEEN.Tween(begin).to(original, ANIMATION_DURATION).onUpdate(updateBack);
+
+			tweenHead.onUpdate(function() {
+				update()
+
+			})
+			tweenHead.chain(tweenBack);
+			tweenHead.start();
 
 		}
+
+
 	}
 
 	function handleIncorrectGuess() {
@@ -298,38 +335,23 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 		}
 	}
 
-	function growBox(entityID) {
-		Entities.editEntity(entityID, {
-			scale: {
-				x: 5,
-				y: 5,
-				z: 5
-			}
-		})
-	}
 
 
-	function shrinkBox() {
-		Entities.editEntity(entityID, {
-			scale: {
-				x: 1,
-				y: 1,
-				z: 1
-			}
-		})
-	}
+	function resetCombinationSound() {
+		App.comboSoundIndex = 0;
+		for (var i = 0; i < App.combinationIntervals.length; i++) {
+			Script.clearInterval(App.combinationIntervals[i]);
+		}
 
-	function toggleGlow(entityID) {
-
-		Script.setTimeout(shrinkBox(entityID, GLOW_DURATION));
 	}
 
 	function handleMagicBoxInput(boxIndex) {
 		var _a = App;
 		var entityID = _a.boxes[boxIndex];
-		growBox(entityID);
+		_a.animateBlock(entityID);
 		playSound(boxIndex);
 		makeAGuess(boxIndex);
+		resetCombinationSound();
 	}
 
 	function stopSound(soundPlaying) {
@@ -338,11 +360,6 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 	}
 
 
-	function toggleGlowForDuration() {
-		var duration = GLOW_DURATION;
-		//	Script.setTimeout(_t.stopSound(soundPlaying), duration);
-
-	}
 
 	function playerDidWin() {
 		storeScore(round)
@@ -355,7 +372,7 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 
 	function restartGame() {
 		print("Work on that memory!  Try again.");
-		Script.clearInterval(App.combinationInterval);
+		resetCombinationSound();
 
 		var _a = App;
 		_a.currentGuessIndex = 0;
@@ -369,7 +386,7 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 
 	function storeScore(userID, score) {
 		var http = new XMLHttpRequest();
-		var url = demoBaseURL+"api/scores";
+		var url = demoBaseURL + "api/scores";
 		var params = "userID=" + userID + "&score=" + score;
 		http.open("POST", url, true);
 
@@ -390,7 +407,7 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 
 	function getHighScores(howMany) {
 		var http = new XMLHttpRequest();
-		var url = demoBaseURL+"api/top/" + howMany;
+		var url = demoBaseURL + "api/top/" + howMany;
 		http.open("GET", url, true);
 
 		//Send the proper header information along with the request
@@ -471,13 +488,22 @@ var demoBaseURL="https://hifi-spatial-sound-game.herokuapp.com/"
 
 	Controller.mousePressEvent.connect(mousePressEvent);
 
+
+	function updateTweens() {
+		TWEEN.update();
+	}
+
+	Script.update.connect(updateTweens);
+
+
+
 	function scriptEnding() {
 		var _a = App;
 		for (var i = 0; i < _a.boxes.length; i++) {
 			console.log('cleaning up')
 			Entities.deleteEntity(_a.boxes[i]);
 		}
-		Script.clearInterval(App.combinationInterval);
+		resetCombinationSound();
 
 	}
 	Script.scriptEnding.connect(scriptEnding);
