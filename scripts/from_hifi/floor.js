@@ -23,7 +23,7 @@ var ground = Entities.addEntity({
 
 
 function cleanup() {
-  // Entities.deleteEntity(ground);
+  Entities.deleteEntity(ground);
 }
 
 Script.scriptEnding.connect(cleanup);

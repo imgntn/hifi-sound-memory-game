@@ -1,14 +1,23 @@
 	print("started loading...");
 	var console = {};
 	console.log = function(p) {
-		print(p)
+		if (arguments.length > 1) {
+
+			for (var i = 1; i < arguments.length; i++) {
+				print(arguments[i])
+			}
+
+		} else {
+			print(p)
+		}
+
 	}
 
 	console.log('jtest!!!!')
 
-
+	//thanks for the assist!! :)
 	Script.include('https://hifi-public.s3.amazonaws.com/eric/scripts/tween.js');
-	Script.include('https://localhost:8080/from_hifi/floor.js');
+	Script.include('http://localhost:8080/from_hifi/floor.js');
 
 	var SOUND_URLS = [
 		'http://localhost:8080/wavs/C3.wav',
@@ -37,9 +46,36 @@
 		Audio.playSound(soundClips[index], options);
 
 	}
+
+
+	var RED = {
+		red: 255,
+		green: 0,
+		blue: 0
+	};
+
+	var GREEN = {
+		red: 0,
+		green: 255,
+		blue: 0
+	};
+
+	var BLUE = {
+		red: 0,
+		green: 0,
+		blue: 255
+	};
+
+	var YELLOW = {
+		red: 255,
+		green: 255,
+		blue: 0
+	};
+
+
 	var GLOW_DURATION, SOUND_DURATION;
 	GLOW_DURATION = SOUND_DURATION = 1000;
-	var RADIAL_DISTANCE = 10;
+	var RADIAL_DISTANCE = 5;
 	// var BOX_LOCATIONS = [{
 	// 	x: MyAvatar.position.x + RADIAL_DISTANCE,
 	// 	y: MyAvatar.position.y,
@@ -58,26 +94,30 @@
 	// 	z: MyAvatar.position.z,
 	// }]
 
-		var BOX_LOCATIONS = [{
-		x: MyAvatar.position.x ,
-		y: MyAvatar.position.y,
-		z: MyAvatar.position.z + RADIAL_DISTANCE,
-	},
-	{
-		x: MyAvatar.position.x + RADIAL_DISTANCE,
-		y: MyAvatar.position.y,
-		z: MyAvatar.position.z + RADIAL_DISTANCE,
-	},
-	{
-		x: MyAvatar.position.x  - RADIAL_DISTANCE,
-		y: MyAvatar.position.y,
-		z: MyAvatar.position.z + RADIAL_DISTANCE,
-	},
-	{
-		x: MyAvatar.position.x + RADIAL_DISTANCE*2,
-		y: MyAvatar.position.y,
-		z: MyAvatar.position.z + RADIAL_DISTANCE ,
-	}]
+	var BOX_LOCATIONS = [{
+			x: MyAvatar.position.x + RADIAL_DISTANCE * 2,
+			y: MyAvatar.position.y,
+			z: MyAvatar.position.z + RADIAL_DISTANCE,
+		}, {
+			x: MyAvatar.position.x + RADIAL_DISTANCE,
+			y: MyAvatar.position.y,
+			z: MyAvatar.position.z + RADIAL_DISTANCE,
+		},
+
+		{
+			x: MyAvatar.position.x,
+			y: MyAvatar.position.y,
+			z: MyAvatar.position.z + RADIAL_DISTANCE,
+		},
+
+		{
+			x: MyAvatar.position.x - RADIAL_DISTANCE,
+			y: MyAvatar.position.y,
+			z: MyAvatar.position.z + RADIAL_DISTANCE,
+		},
+
+
+	]
 
 
 	var App = {
@@ -103,16 +143,16 @@
 				combination.push(combo);
 
 			}
-			_t.combination=combination;
-			console.log('starting combination is...',combination)
+			_t.combination = combination;
+			console.log('starting combination is...' + combination)
 			return combination
 		},
 		generateNextStep: function() {
 			var _t = this;
 			var step = Math.random(0, _t.startingCombinationLength);
-			step = Math.floor(combo * _t.startingCombinationLength);
-			combination.push(step);
-			console.log('new step is:', step)
+			step = Math.floor(step * _t.startingCombinationLength);
+			_t.combination.push(step);
+			console.log('new step is:' + step)
 			return
 		},
 		handleFinalGuess: function() {
@@ -220,7 +260,11 @@
 		print("CORRECT!")
 		var _a = App;
 		_a.currentGuessIndex++;
+
 		print('current guess index:' + _a.currentGuessIndex)
+		if (_a.currentGuessIndex === _a.combination.length) {
+			_a.handleFinalGuess()
+		}
 	}
 
 	function makeAGuess(guessValue) {
@@ -242,10 +286,10 @@
 
 	function growBox(entityID) {
 		Entities.editEntity(entityID, {
-			scale:{
-				x:5,
-				y:5,
-				z:5
+			scale: {
+				x: 5,
+				y: 5,
+				z: 5
 			}
 		})
 	}
@@ -253,16 +297,16 @@
 
 	function shrinkBox() {
 		Entities.editEntity(entityID, {
-		scale:{
-				x:1,
-				y:1,
-				z:1
+			scale: {
+				x: 1,
+				y: 1,
+				z: 1
 			}
 		})
 	}
 
 	function toggleGlow(entityID) {
-	
+
 		Script.setTimeout(shrinkBox(entityID, GLOW_DURATION));
 	}
 
