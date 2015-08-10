@@ -12,3 +12,4 @@ todo:
 - try different shapes
 - try different animations
 - record all playback instead of only final score?
+- twitch?
