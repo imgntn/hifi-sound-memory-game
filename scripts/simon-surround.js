@@ -42,7 +42,7 @@
 
 	}
 
-	var buzzSound = SoundCache.getSound(demoBaseURL + "wavs/buzz.wav"),
+	var buzzSound = SoundCache.getSound(demoBaseURL + "wavs/buzz.wav");
 
 		function playBuzz() {
 			var options = {
