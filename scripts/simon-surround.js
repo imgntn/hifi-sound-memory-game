@@ -1,15 +1,6 @@
 	print("started loading...");
 	var console = {};
 	console.log = function(p) {
-		if (arguments.length > 1) {
-
-			for (var i = 1; i < arguments.length; i++) {
-				print(arguments[i])
-			}
-
-		} else {
-			print(p)
-		}
 
 	}
 
